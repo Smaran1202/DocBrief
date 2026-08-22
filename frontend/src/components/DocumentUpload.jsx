@@ -1,6 +1,9 @@
 import { useRef, useState } from "react";
 
-import { extractDocumentText } from "../services/documentApi";
+import {
+  extractDocumentText,
+  summarizeDocumentText,
+} from "../services/documentApi";
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 const ACCEPTED_EXTENSIONS = [".pdf", ".png", ".jpg", ".jpeg"];
@@ -8,6 +11,11 @@ const ACCEPTED_MIME_TYPES = [
   "application/pdf",
   "image/png",
   "image/jpeg",
+];
+const SUMMARY_LENGTHS = [
+  { value: "short", label: "Short" },
+  { value: "medium", label: "Medium" },
+  { value: "long", label: "Long" },
 ];
 
 function getFileExtension(fileName) {
@@ -66,6 +74,10 @@ function DocumentUpload() {
   const [isDragging, setIsDragging] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractedText, setExtractedText] = useState("");
+  const [summaryLength, setSummaryLength] = useState("short");
+  const [summary, setSummary] = useState("");
+  const [summaryError, setSummaryError] = useState("");
+  const [isSummarizing, setIsSummarizing] = useState(false);
 
   function selectFile(file, nextNotice = "") {
     const validationError = validateFile(file);
@@ -75,6 +87,8 @@ function DocumentUpload() {
       setError(validationError);
       setNotice(nextNotice);
       setExtractedText("");
+      setSummary("");
+      setSummaryError("");
       return;
     }
 
@@ -82,6 +96,8 @@ function DocumentUpload() {
     setError("");
     setNotice(nextNotice);
     setExtractedText("");
+    setSummary("");
+    setSummaryError("");
   }
 
   function handleFiles(files) {
@@ -135,7 +151,10 @@ function DocumentUpload() {
     setError("");
     setNotice("");
     setExtractedText("");
+    setSummary("");
+    setSummaryError("");
     setIsExtracting(false);
+    setIsSummarizing(false);
   }
 
   function openFilePicker() {
@@ -151,6 +170,8 @@ function DocumentUpload() {
     setError("");
     setNotice("");
     setExtractedText("");
+    setSummary("");
+    setSummaryError("");
 
     try {
       const result = await extractDocumentText(selectedFile);
@@ -163,6 +184,29 @@ function DocumentUpload() {
       );
     } finally {
       setIsExtracting(false);
+    }
+  }
+
+  async function handleGenerateSummary() {
+    if (!extractedText || isSummarizing) {
+      return;
+    }
+
+    setIsSummarizing(true);
+    setSummaryError("");
+    setSummary("");
+
+    try {
+      const result = await summarizeDocumentText(extractedText, summaryLength);
+      setSummary(result.summary);
+    } catch (requestError) {
+      setSummaryError(
+        requestError instanceof Error
+          ? requestError.message
+          : "We couldn't generate a summary right now. Please try again.",
+      );
+    } finally {
+      setIsSummarizing(false);
     }
   }
 
@@ -205,7 +249,7 @@ function DocumentUpload() {
                 type="button"
                 className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
                 onClick={openFilePicker}
-                disabled={isExtracting}
+                disabled={isExtracting || isSummarizing}
               >
                 Replace file
               </button>
@@ -213,7 +257,7 @@ function DocumentUpload() {
                 type="button"
                 className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
                 onClick={handleRemoveFile}
-                disabled={isExtracting}
+                disabled={isExtracting || isSummarizing}
               >
                 Remove
               </button>
@@ -221,7 +265,7 @@ function DocumentUpload() {
                 type="button"
                 className="rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-400"
                 onClick={handleExtractText}
-                disabled={isExtracting}
+                disabled={isExtracting || isSummarizing}
               >
                 {isExtracting ? "Extracting text..." : "Extract text"}
               </button>
@@ -280,6 +324,74 @@ function DocumentUpload() {
           </h2>
           <div className="mt-3 max-h-80 overflow-auto rounded-md border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">
             <pre className="whitespace-pre-wrap font-sans">{extractedText}</pre>
+          </div>
+
+          <div className="mt-6 rounded-md border border-slate-200 bg-white p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <label
+                  htmlFor="summary-length"
+                  className="text-sm font-medium text-slate-800"
+                >
+                  Summary length
+                </label>
+                <select
+                  id="summary-length"
+                  className="mt-2 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500 sm:w-40"
+                  value={summaryLength}
+                  onChange={(event) => {
+                    setSummaryLength(event.target.value);
+                    setSummary("");
+                    setSummaryError("");
+                  }}
+                  disabled={isSummarizing}
+                >
+                  {SUMMARY_LENGTHS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                type="button"
+                className="rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-400"
+                onClick={handleGenerateSummary}
+                disabled={isSummarizing}
+              >
+                {isSummarizing ? "Generating summary..." : "Generate Summary"}
+              </button>
+            </div>
+
+            {isSummarizing ? (
+              <p
+                role="status"
+                className="mt-3 rounded-md bg-sky-50 px-3 py-2 text-sm font-medium text-sky-800"
+              >
+                Generating summary...
+              </p>
+            ) : null}
+
+            {summaryError ? (
+              <p
+                role="alert"
+                className="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-700"
+              >
+                {summaryError}
+              </p>
+            ) : null}
+
+            {summary ? (
+              <div className="mt-5">
+                <h2 className="text-base font-semibold text-slate-900">
+                  Summary
+                </h2>
+                <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">
+                  <pre className="whitespace-pre-wrap font-sans">{summary}</pre>
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       ) : null}

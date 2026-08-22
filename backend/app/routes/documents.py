@@ -1,6 +1,15 @@
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
-from app.schemas.documents import DocumentExtractionResponse
+from app.schemas.documents import (
+    DocumentExtractionResponse,
+    DocumentSummaryRequest,
+    DocumentSummaryResponse,
+)
+from app.services.gemini_summary import (
+    GeminiConfigurationError,
+    GeminiSummaryError,
+    summarize_document_text,
+)
 from app.services.ocr_service import OcrError, extract_image_text
 from app.services.pdf_extractor import ExtractionError, extract_pdf_text
 from app.utils.file_validation import (
@@ -59,3 +68,32 @@ async def extract_document_text(
         file_type=validated_file.content_type,
         text=cleaned_text,
     )
+
+
+@router.post(
+    "/summarize",
+    response_model=DocumentSummaryResponse,
+    summary="Generate an AI summary from extracted document text",
+    description=(
+        "Accepts extracted document text and returns a Gemini-generated summary "
+        "using the requested length."
+    ),
+)
+def summarize_document(request: DocumentSummaryRequest):
+    try:
+        summary = summarize_document_text(
+            text=request.text.strip(),
+            length=request.length,
+        )
+    except GeminiConfigurationError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="AI summarization is not configured on this server.",
+        ) from exc
+    except GeminiSummaryError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail="We couldn't generate a summary right now. Please try again.",
+        ) from exc
+
+    return DocumentSummaryResponse(summary=summary, length=request.length)

@@ -31,3 +31,27 @@ export async function extractDocumentText(file) {
 
   return response.json();
 }
+
+export async function summarizeDocumentText(text, length) {
+  const response = await fetch(`${API_BASE_URL}/api/documents/summarize`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text, length }),
+  });
+
+  if (!response.ok) {
+    let errorResponse = null;
+
+    try {
+      errorResponse = await response.json();
+    } catch {
+      errorResponse = null;
+    }
+
+    throw new Error(getErrorMessage(errorResponse));
+  }
+
+  return response.json();
+}
