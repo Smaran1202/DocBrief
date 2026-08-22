@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 
+import { extractDocumentText } from "../services/documentApi";
+
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 const ACCEPTED_EXTENSIONS = [".pdf", ".png", ".jpg", ".jpeg"];
 const ACCEPTED_MIME_TYPES = [
@@ -62,6 +64,8 @@ function DocumentUpload() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [isDragging, setIsDragging] = useState(false);
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [extractedText, setExtractedText] = useState("");
 
   function selectFile(file, nextNotice = "") {
     const validationError = validateFile(file);
@@ -70,12 +74,14 @@ function DocumentUpload() {
       setSelectedFile(null);
       setError(validationError);
       setNotice(nextNotice);
+      setExtractedText("");
       return;
     }
 
     setSelectedFile(file);
     setError("");
     setNotice(nextNotice);
+    setExtractedText("");
   }
 
   function handleFiles(files) {
@@ -128,10 +134,36 @@ function DocumentUpload() {
     setSelectedFile(null);
     setError("");
     setNotice("");
+    setExtractedText("");
+    setIsExtracting(false);
   }
 
   function openFilePicker() {
     inputRef.current?.click();
+  }
+
+  async function handleExtractText() {
+    if (!selectedFile || isExtracting) {
+      return;
+    }
+
+    setIsExtracting(true);
+    setError("");
+    setNotice("");
+    setExtractedText("");
+
+    try {
+      const result = await extractDocumentText(selectedFile);
+      setExtractedText(result.text);
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "We couldn't extract text from this document. Please try another file.",
+      );
+    } finally {
+      setIsExtracting(false);
+    }
   }
 
   const uploadStateClasses = isDragging
@@ -171,8 +203,9 @@ function DocumentUpload() {
             <div className="mt-4 flex flex-col gap-3 sm:flex-row">
               <button
                 type="button"
-                className="rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+                className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
                 onClick={openFilePicker}
+                disabled={isExtracting}
               >
                 Replace file
               </button>
@@ -180,11 +213,28 @@ function DocumentUpload() {
                 type="button"
                 className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
                 onClick={handleRemoveFile}
+                disabled={isExtracting}
               >
                 Remove
               </button>
+              <button
+                type="button"
+                className="rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-400"
+                onClick={handleExtractText}
+                disabled={isExtracting}
+              >
+                {isExtracting ? "Extracting text..." : "Extract text"}
+              </button>
             </div>
           </div>
+          {isExtracting ? (
+            <p
+              role="status"
+              className="mt-3 rounded-md bg-sky-50 px-3 py-2 text-sm font-medium text-sky-800"
+            >
+              Extracting text...
+            </p>
+          ) : null}
         </div>
       ) : (
         <div className="mx-auto flex max-w-xl flex-col items-center">
@@ -221,6 +271,17 @@ function DocumentUpload() {
         >
           {error}
         </p>
+      ) : null}
+
+      {extractedText ? (
+        <div className="mx-auto mt-6 max-w-xl text-left">
+          <h2 className="text-base font-semibold text-slate-900">
+            Extracted Text
+          </h2>
+          <div className="mt-3 max-h-80 overflow-auto rounded-md border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">
+            <pre className="whitespace-pre-wrap font-sans">{extractedText}</pre>
+          </div>
+        </div>
       ) : null}
     </section>
   );

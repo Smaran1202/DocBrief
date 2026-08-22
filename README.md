@@ -1,6 +1,6 @@
 # DocuBrief AI
 
-DocuBrief AI is a document summary assistant that will accept PDF and image documents and generate concise AI-powered summaries in later phases. This phase establishes the project foundation only.
+DocuBrief AI is a document summary assistant that accepts PDF and image documents, extracts text from them, and will generate concise AI-powered summaries in later phases.
 
 ## Planned Features
 
@@ -18,7 +18,7 @@ DocuBrief AI is a document summary assistant that will accept PDF and image docu
 
 ## Current Status
 
-Phase 0 is complete: the monorepo structure, FastAPI health endpoint, CORS configuration, environment example, and minimal React frontend are in place. Uploads, OCR, PDF extraction, and AI summaries are not implemented yet.
+Phase 2 is complete: the app supports frontend document selection, backend upload validation, PDF text extraction, and image OCR. AI summaries are not implemented yet.
 
 ## Local Setup
 
@@ -33,6 +33,13 @@ uvicorn app.main:app
 ```
 
 The backend health check is available at `http://127.0.0.1:8000/api/health`.
+API docs are available at `http://127.0.0.1:8000/docs`.
+
+Image OCR requires Tesseract to be installed on your system:
+
+- Windows: install Tesseract OCR and add it to `PATH`, or set `TESSERACT_CMD` to the executable path.
+- macOS: `brew install tesseract`
+- Ubuntu/Debian: `sudo apt install tesseract-ocr`
 
 ### Frontend
 
