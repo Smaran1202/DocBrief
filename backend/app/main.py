@@ -8,22 +8,23 @@ from app.routes.documents import router as documents_router
 
 load_dotenv()
 
-frontend_origin = os.getenv(
-    "FRONTEND_ORIGIN",
-    "http://localhost:5173"
-)
+app = FastAPI(title="DocuBrief AI API")
 
-allowed_origins = {
-    frontend_origin,
+allowed_origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-}
+    "https://doc-brief-lqgnxwlt-smaran-s-projects.vercel.app",
+    "https://doc-brief.vercel.app",
+]
 
-app = FastAPI(title="DocuBrief AI")
+frontend_origin = os.getenv("FRONTEND_ORIGIN")
+
+if frontend_origin:
+    allowed_origins.append(frontend_origin.rstrip("/"))
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=list(allowed_origins),
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -42,4 +43,6 @@ def root():
 
 @app.get("/api/health")
 def health_check():
-    return {"status": "ok"}
+    return {
+        "status": "ok"
+    }
