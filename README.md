@@ -1,130 +1,175 @@
 DocuBrief AI
-> An AI-powered document intelligence workspace that extracts content from PDFs and images and generates concise, configurable summaries.
-DocuBrief AI is a full-stack application designed to simplify document understanding. Users can upload documents, extract their text using document-processing and OCR techniques, and generate AI-powered summaries using Google Gemini.
-The project combines a React frontend with a FastAPI backend and follows a modular API-driven architecture.
----
-🚀 Features
+
+An AI-powered document intelligence application that extracts text from PDFs and images and generates concise, configurable summaries.
+
+DocuBrief AI is a full-stack application built to simplify document understanding. Users can upload supported PDF or image documents, extract their content using PDF text extraction or OCR, and generate AI-powered summaries using Google Gemini.
+
+The application follows a client-server architecture with a React frontend and a FastAPI backend.
+
+✨ Features
+
 📄 Upload PDF and image documents
-🔍 Extract text from PDF documents using PyMuPDF
-🖼️ OCR support for image-based documents using Tesseract
-🤖 AI-powered document summarization using Google Gemini
-📏 Configurable summary length
-⚡ FastAPI REST backend
+
+🔍 Extract text from PDFs using PyMuPDF
+
+🖼️ Extract text from image-based documents using Tesseract OCR
+
+🤖 Generate AI-powered summaries using Google Gemini
+
+📏 Configure the desired summary length
+
+⚡ REST APIs built with FastAPI
+
 ⚛️ React + Vite frontend
-🎨 Tailwind CSS
-🔐 Environment-based configuration for API credentials
-✅ File type and size validation
+
+🎨 Tailwind CSS-based UI
+
+✅ File type and file size validation
+
+🔐 Environment-based API key configuration
+
 🩺 Backend health-check endpoint
-📚 Automatically generated API documentation with Swagger UI
-🔌 Clean separation between frontend, backend, and document-processing services
----
+
+📚 Automatic OpenAPI/Swagger API documentation
+
+🧩 Modular separation between routes, services, schemas, and utilities
+
 🏗️ Architecture
-```text
-                         ┌──────────────────────┐
-                         │        User          │
-                         └──────────┬───────────┘
-                                    │
-                                    ▼
-                         ┌──────────────────────┐
-                         │   React Frontend     │
-                         │   Vite + Tailwind    │
-                         └──────────┬───────────┘
-                                    │
+
+                         ┌───────────────────┐
+                         │       User        │
+                         └─────────┬─────────┘
+                                   │
+                                   ▼
+                         ┌───────────────────┐
+                         │  React Frontend  │
+                         │   Vite + Tailwind │
+                         └─────────┬─────────┘
+                                   │
                               REST API
-                                    │
-                                    ▼
-                         ┌──────────────────────┐
-                         │    FastAPI Backend   │
-                         └──────────┬───────────┘
-                                    │
-                  ┌─────────────────┼─────────────────┐
-                  │                 │                 │
-                  ▼                 ▼                 ▼
-          ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
-          │ PDF          │  │ Tesseract    │  │ Validation   │
-          │ Extraction   │  │ OCR          │  │ & Processing │
-          │ PyMuPDF      │  │              │  │              │
-          └──────┬───────┘  └──────┬───────┘  └──────────────┘
-                 │                 │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌──────────────────┐
-                 │  Extracted Text  │
-                 └────────┬─────────┘
-                          │
-                          ▼
-                 ┌──────────────────┐
-                 │   Google Gemini  │
-                 │  Summarization   │
-                 └────────┬─────────┘
-                          │
-                          ▼
-                 ┌──────────────────┐
-                 │ Generated Summary│
-                 └────────┬─────────┘
-                          │
-                          ▼
-                 ┌──────────────────┐
-                 │  React Frontend  │
-                 └──────────────────┘
-```
----
+                                   │
+                                   ▼
+                         ┌───────────────────┐
+                         │  FastAPI Backend  │
+                         └─────────┬─────────┘
+                                   │
+                    ┌──────────────┼──────────────┐
+                    │              │              │
+                    ▼              ▼              ▼
+             ┌────────────┐ ┌────────────┐ ┌────────────┐
+             │  PyMuPDF   │ │ Tesseract  │ │ Validation │
+             │ PDF Parser │ │    OCR     │ │ & Handling │
+             └─────┬──────┘ └─────┬──────┘ └────────────┘
+                   │              │
+                   └───────┬──────┘
+                           ▼
+                  ┌─────────────────┐
+                  │  Extracted Text │
+                  └────────┬────────┘
+                           │
+                           ▼
+                  ┌─────────────────┐
+                  │  Google Gemini  │
+                  │  Summarization  │
+                  └────────┬────────┘
+                           │
+                           ▼
+                  ┌─────────────────┐
+                  │ Generated       │
+                  │ Summary         │
+                  └────────┬────────┘
+                           │
+                           ▼
+                  ┌─────────────────┐
+                  │ React Frontend  │
+                  └─────────────────┘
+
 🔄 How It Works
-1. Upload
+
+Upload
 The user uploads a supported PDF or image through the React frontend.
-Supported formats:
-PDF
-PNG
-JPG
-JPEG
-2. Extract
-The FastAPI backend processes the uploaded document.
-PDF: text is extracted using PyMuPDF.
-Images: text is extracted using Tesseract OCR.
-3. Summarize
-The extracted text is sent to Google Gemini, which generates a summary based on the selected summary length.
-```text
+
+Validate
+The backend validates the uploaded file type and size before processing.
+
+Extract
+
+PDF documents are processed using PyMuPDF.
+
+Image documents are processed using Tesseract OCR.
+
+Summarize
+The extracted text is sent to Google Gemini, along with the selected summary-length configuration.
+
+Display
+The generated summary is returned through the REST API and displayed in the React frontend.
+
 Document
-    ↓
+   │
+   ▼
 File Validation
-    ↓
+   │
+   ▼
 PDF Extraction / OCR
-    ↓
+   │
+   ▼
 Extracted Text
-    ↓
+   │
+   ▼
 Google Gemini
-    ↓
+   │
+   ▼
 AI Summary
-    ↓
+   │
+   ▼
 React Frontend
-```
----
+
 🛠️ Technology Stack
+
 Frontend
+
 React.js
+
 Vite
-Tailwind CSS
+
 JavaScript
+
+Tailwind CSS
+
 Backend
+
 Python
+
 FastAPI
+
 Uvicorn
+
 Pydantic
+
 Document Processing
+
 PyMuPDF
+
 Tesseract OCR
+
 AI
+
 Google Gemini API
-Development & API Tools
+
+Development Tools
+
 Git
+
 GitHub
+
 VS Code
-Swagger UI
-OpenAPI
----
+
+Swagger UI / OpenAPI
+
+Pytest
+
 📁 Project Structure
-```text
+
 DocuBrief AI/
 │
 ├── backend/
@@ -148,217 +193,251 @@ DocuBrief AI/
 │
 ├── .gitignore
 └── README.md
-```
----
+
 🔌 REST API
+
 Health Check
-```http
+
 GET /api/health
-```
+
 Used to verify that the backend service is running.
+
 Extract Document Text
-```http
+
 POST /api/documents/extract
-```
-Extracts text from an uploaded PDF or image document.
+
+Accepts a supported PDF or image file and extracts its text.
+
 Generate Summary
-```http
+
 POST /api/documents/summarize
-```
-Generates an AI-powered summary from the document content.
----
+
+Generates an AI-powered summary from the extracted document content.
+
 📚 API Documentation
-When running locally, FastAPI provides interactive API documentation.
-Swagger UI
-```text
+
+When the FastAPI backend is running locally, interactive API documentation is available through Swagger UI:
+
 http://localhost:8000/docs
-```
-ReDoc
-```text
+
+ReDoc is also available:
+
 http://localhost:8000/redoc
-```
----
+
 ⚙️ Local Development
+
 Prerequisites
-Install:
+
+Install the following:
+
 Python 3.11+
-Node.js
-npm
+
+Node.js and npm
+
 Tesseract OCR
+
 Git
-You also need a Google Gemini API key.
----
-🔧 Backend Setup
+
+Google Gemini API key
+
+1. Clone the Repository
+
+git clone https://github.com/Smaran1202/DocBrief.git
+cd DocBrief
+
+2. Backend Setup
+
 Navigate to the backend:
-```bash
+
 cd backend
-```
+
 Create a virtual environment:
-```bash
+
 python -m venv .venv
-```
-On Windows:
-```powershell
+
+Windows
+
 .\.venv\Scripts\activate
-```
-Install dependencies:
-```bash
+
+macOS / Linux
+
+source .venv/bin/activate
+
+Install Python dependencies:
+
 pip install -r requirements.txt
-```
----
-🔐 Environment Variables
+
+3. Configure Environment Variables
+
 Create:
-```text
+
 backend/.env
-```
-Add the required configuration:
-```env
+
+Add:
+
 GEMINI_API_KEY=your_gemini_api_key
 FRONTEND_ORIGIN=http://localhost:5173
-```
-Do not commit `.env` to GitHub.
-Use `.env.example` to document required environment variables without storing real credentials.
----
-▶️ Run Backend
-From the `backend` directory:
-```bash
+
+Never commit .env or real API credentials to GitHub.
+Use .env.example to document required environment variables.
+
+4. Run the Backend
+
+From the backend directory:
+
 uvicorn app.main:app --reload --port 8000
-```
-The backend will be available at:
-```text
+
+Backend:
+
 http://localhost:8000
-```
+
 Swagger UI:
-```text
+
 http://localhost:8000/docs
-```
----
-🎨 Frontend Setup
+
+5. Run the Frontend
+
 Open another terminal and navigate to the frontend:
-```bash
+
 cd frontend
-```
+
 Install dependencies:
-```bash
+
 npm install
-```
+
 Start the development server:
-```bash
+
 npm run dev
-```
+
 The frontend will normally be available at:
-```text
+
 http://localhost:5173
-```
----
-🧪 Testing
-Before deployment, verify:
-[x] Backend health check
-[x] PDF upload
-[x] Image upload
-[x] PDF text extraction
-[x] OCR extraction
-[x] Gemini summarization
-[x] Summary length selection
-[x] Invalid file handling
-[x] File size validation
-[x] Frontend/backend communication
-[x] Swagger API testing
-Backend tests can be executed using:
-```bash
-pytest
-```
----
-🔒 Security
-The application follows basic security practices for API credentials and uploaded files.
-API credentials are stored using environment variables.
-Gemini API keys are not hard-coded.
-`.env` is excluded from Git.
+
+🔐 Security Considerations
+
+The project follows basic security practices for application credentials and uploaded files:
+
+Gemini API credentials are stored using environment variables.
+
+API keys are not hard-coded into the frontend.
+
+.env is excluded from Git.
+
 Uploaded files are validated by type and size.
+
 Backend APIs validate incoming requests.
-Production secrets should be configured through the deployment platform.
-The Gemini API key must never be exposed to frontend/browser code.
----
-🚀 Production Deployment
-DocuBrief AI is designed to deploy the frontend and backend as separate services.
-```text
+
+Production secrets should be configured through the hosting platform.
+
+Never expose the Gemini API key in browser-side code.
+
+🧪 Testing
+
+Backend tests can be executed using:
+
+pytest
+
+Before using the application, verify the main workflow:
+
+[ ] Backend health check
+[ ] PDF upload
+[ ] Image upload
+[ ] PDF text extraction
+[ ] OCR extraction
+[ ] Gemini summarization
+[ ] Summary length selection
+[ ] Invalid file handling
+[ ] File size validation
+[ ] Frontend/backend communication
+
+🚀 Deployment
+
+DocuBrief AI is structured so that the frontend and backend can be deployed as separate services.
+
                     Production
-                        │
-             ┌──────────┴──────────┐
-             │                     │
-             ▼                     ▼
-      React Frontend         FastAPI Backend
-                                   │
-                                   ▼
-                             Google Gemini
-```
-The production frontend must communicate with the deployed backend URL rather than:
-```text
-http://localhost:8000
-```
-Production environment variables should be configured directly through the hosting platform.
-Tesseract OCR must also be available in the backend deployment environment.
----
-📌 Project Status
-Completed
-[x] Project foundation
-[x] React frontend
-[x] FastAPI backend
-[x] Document upload
-[x] File validation
-[x] PDF text extraction
-[x] Image OCR
-[x] Gemini AI integration
-[x] AI summarization
-[x] Configurable summary length
-[x] REST API
-[x] Swagger/OpenAPI documentation
-[x] Environment-based configuration
-[x] Frontend/backend integration
-[x] Local end-to-end testing
-Deployment
-[ ] Deploy backend
-[ ] Deploy frontend
-[ ] Configure production environment variables
-[ ] Connect frontend to production backend
-[ ] Perform final production testing
----
+                         │
+              ┌──────────┴──────────┐
+              │                     │
+              ▼                     ▼
+       React Frontend         FastAPI Backend
+                                    │
+                                    ▼
+                              Google Gemini
+
+For production deployment:
+
+Configure environment variables through the hosting platform.
+
+Replace local backend URLs with the deployed backend URL.
+
+Ensure Tesseract OCR is available in the backend environment.
+
+Configure the appropriate frontend origin/CORS settings.
+
+Perform end-to-end testing after deployment.
+
 🎯 Engineering Highlights
+
 DocuBrief AI demonstrates practical software engineering concepts including:
+
 Full-stack application development
+
 REST API design
+
 Client-server architecture
-Modular FastAPI backend architecture
-React component-based frontend
+
+Modular FastAPI backend structure
+
+Component-based React frontend
+
 File upload and validation
+
 PDF document processing
+
 OCR integration
+
 Generative AI integration
+
 Environment-based configuration
+
 API error handling
-Frontend/backend integration
+
 OpenAPI documentation
+
+Automated backend testing
+
 Git-based version control
-Production deployment preparation
----
+
 🔮 Future Improvements
-Potential future improvements include:
-User authentication
+
+Potential improvements include:
+
+User authentication and authorization
+
 Document history
-Multiple document summarization
+
+Multiple-document summarization
+
 Streaming AI responses
+
 Export summaries to PDF/DOCX
+
 Semantic document search
+
 Embedding-based retrieval
+
 RAG-based document question answering
+
 Cloud object storage
+
 Background processing for large documents
+
 Usage monitoring and analytics
----
+
 💡 Why DocuBrief AI?
-Reading and understanding long documents can be time-consuming.
-DocuBrief AI combines traditional document-processing techniques with generative AI to provide a simple workflow:
-```text
+
+Understanding long documents manually can be time-consuming. DocuBrief AI combines traditional document-processing techniques with generative AI to create a simple workflow:
+
 Upload
    ↓
 Extract
@@ -366,16 +445,19 @@ Extract
 Understand
    ↓
 Summarize
-```
-The application demonstrates how document processing, OCR, REST APIs, and generative AI can be combined into a practical full-stack system.
----
+
+The project demonstrates how document processing, OCR, REST APIs, and generative AI can be combined into a practical full-stack application.
+
 👨‍💻 Author
+
 Smaran Pidathala
-B.Tech Computer Science Engineering
-GitHub:  
-https://github.com/Smaran1202
-LinkedIn:  
-https://www.linkedin.com/in/smaran-pidathala/
----
-⭐ DocuBrief AI
+B.Tech — Computer Science Engineering
+
+GitHub: https://github.com/Smaran1202
+
+LinkedIn: https://www.linkedin.com/in/smaran-pidathala/
+
+📌 Project
+
+DocuBrief AI
 React + FastAPI + PyMuPDF + Tesseract OCR + Google Gemini
