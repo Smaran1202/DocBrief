@@ -472,17 +472,6 @@ generative AI to provide a simple workflow:
 The application demonstrates how document processing, OCR, REST APIs,
 and generative AI can be combined into a practical full-stack system.
 
-------------------------------------------------------------------------
-
-## 👨‍💻 Author
-
-**Smaran Pidathala**
-
-B.Tech --- Computer Science Engineering
-
-GitHub: Smaran1202
-
-LinkedIn: Smaran Pidathala
 
 ------------------------------------------------------------------------
 
