@@ -78,6 +78,7 @@ function DocumentUpload() {
   const [summary, setSummary] = useState("");
   const [summaryError, setSummaryError] = useState("");
   const [isSummarizing, setIsSummarizing] = useState(false);
+  const isProcessing = isExtracting || isSummarizing;
 
   function selectFile(file, nextNotice = "") {
     const validationError = validateFile(file);
@@ -101,6 +102,10 @@ function DocumentUpload() {
   }
 
   function handleFiles(files) {
+    if (isProcessing) {
+      return;
+    }
+
     const [file] = Array.from(files);
 
     if (!file) {
@@ -143,6 +148,11 @@ function DocumentUpload() {
     event.preventDefault();
     dragDepthRef.current = 0;
     setIsDragging(false);
+
+    if (isProcessing) {
+      return;
+    }
+
     handleFiles(event.dataTransfer.files);
   }
 
@@ -158,11 +168,15 @@ function DocumentUpload() {
   }
 
   function openFilePicker() {
+    if (isProcessing) {
+      return;
+    }
+
     inputRef.current?.click();
   }
 
   async function handleExtractText() {
-    if (!selectedFile || isExtracting) {
+    if (!selectedFile || isProcessing) {
       return;
     }
 
@@ -188,7 +202,10 @@ function DocumentUpload() {
   }
 
   async function handleGenerateSummary() {
-    if (!extractedText || isSummarizing) {
+    const textToSummarize = extractedText.trim();
+
+    if (!textToSummarize || isProcessing) {
+      setSummaryError("No readable text is available to summarize.");
       return;
     }
 
@@ -197,7 +214,7 @@ function DocumentUpload() {
     setSummary("");
 
     try {
-      const result = await summarizeDocumentText(extractedText, summaryLength);
+      const result = await summarizeDocumentText(textToSummarize, summaryLength);
       setSummary(result.summary);
     } catch (requestError) {
       setSummaryError(
@@ -229,6 +246,7 @@ function DocumentUpload() {
         accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg"
         className="sr-only"
         onChange={handleInputChange}
+        disabled={isProcessing}
       />
 
       {selectedFile ? (
@@ -249,7 +267,7 @@ function DocumentUpload() {
                 type="button"
                 className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
                 onClick={openFilePicker}
-                disabled={isExtracting || isSummarizing}
+                disabled={isProcessing}
               >
                 Replace file
               </button>
@@ -257,7 +275,7 @@ function DocumentUpload() {
                 type="button"
                 className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
                 onClick={handleRemoveFile}
-                disabled={isExtracting || isSummarizing}
+                disabled={isProcessing}
               >
                 Remove
               </button>
@@ -265,7 +283,7 @@ function DocumentUpload() {
                 type="button"
                 className="rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-400"
                 onClick={handleExtractText}
-                disabled={isExtracting || isSummarizing}
+                disabled={isProcessing}
               >
                 {isExtracting ? "Extracting text..." : "Extract text"}
               </button>

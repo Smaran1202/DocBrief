@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+import pytest
 
 from app.main import app
 from app.services.gemini_summary import GeminiConfigurationError, GeminiSummaryError
@@ -6,11 +7,11 @@ from app.services.gemini_summary import GeminiConfigurationError, GeminiSummaryE
 client = TestClient(app)
 
 
-def test_summarize_document_returns_summary(monkeypatch):
+@pytest.mark.parametrize("length", ["short", "medium", "long"])
+def test_summarize_document_returns_summary_for_allowed_lengths(monkeypatch, length):
     def fake_summarize_document_text(text, length):
         assert text == "Important extracted text."
-        assert length == "short"
-        return "Short summary."
+        return f"{length.title()} summary."
 
     monkeypatch.setattr(
         "app.routes.documents.summarize_document_text",
@@ -19,11 +20,14 @@ def test_summarize_document_returns_summary(monkeypatch):
 
     response = client.post(
         "/api/documents/summarize",
-        json={"text": "Important extracted text.", "length": "short"},
+        json={"text": "Important extracted text.", "length": length},
     )
 
     assert response.status_code == 200
-    assert response.json() == {"summary": "Short summary.", "length": "short"}
+    assert response.json() == {
+        "summary": f"{length.title()} summary.",
+        "length": length,
+    }
 
 
 def test_summarize_document_rejects_empty_text():
