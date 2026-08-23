@@ -411,11 +411,11 @@ environment.
 
 ### Deployment
 
--   [ ] Deploy backend
--   [ ] Deploy frontend
--   [ ] Configure production environment variables
--   [ ] Connect frontend to production backend
--   [ ] Perform final production testing
+-   [x] Deploy backend
+-   [x] Deploy frontend
+-   [x] Configure production environment variables
+-   [x] Connect frontend to production backend
+-   [x] Perform final production testing
 
 ------------------------------------------------------------------------
 
